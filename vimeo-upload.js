@@ -2,11 +2,11 @@
  | Vimeo-Upload: Upload videos to your Vimeo account directly from a
  |               browser or a Node.js app
  |
- |  ╭───╮╭─╮  
- |  │   ││ │╭─╮╭──┬──┬─╮╭───╮╭───╮   
+ |  ╭───╮╭─╮
+ |  │   ││ │╭─╮╭──┬──┬─╮╭───╮╭───╮
  |  │   ││ │├─┤│ ╭╮ ╭╮ ││ ─ ││╭╮ │  ╭────────┬─────────────────────╮
- |  ╰╮  ╰╯╭╯│ ││ ││ ││ ││  ─┤│╰╯ │  | UPLOAD │ ▒▒▒▒▒▒▒▒▒▒▒░░░░ %75 | 
- |   ╰────╯ ╰─╯╰─╯╰─╯╰─╯╰───╯╰───╯  ╰────────┴─────────────────────╯                    
+ |  ╰╮  ╰╯╭╯│ ││ ││ ││ ││  ─┤│╰╯ │  | UPLOAD │ ▒▒▒▒▒▒▒▒▒▒▒░░░░ %75 |
+ |   ╰────╯ ╰─╯╰─╯╰─╯╰─╯╰───╯╰───╯  ╰────────┴─────────────────────╯
  |
  |
  | This project was released under Apache 2.0" license.
@@ -116,6 +116,7 @@
         upgrade_to_1080: false,
         offset: 0,
         chunkSize: 0,
+        onlyUpload: false,
         retryHandler: new RetryHandler(),
         onComplete: function() {},
         onProgress: function() {},
@@ -183,6 +184,11 @@
 
     me.prototype.defaults = function(opts) {
         return defaults /* TODO $.extend(true, defaults, opts) */
+    }
+
+    me.prototype.uploadAtUrl = function(uploadUrl) {
+        this.url = uploadUrl;
+        this.sendFile_();
     }
 
     /**
@@ -367,7 +373,11 @@
      */
     me.prototype.onContentUploadSuccess_ = function(e) {
         if (e.target.status == 200 || e.target.status == 201) {
-            this.complete_()
+            if (this.onlyUpload) {
+                this.onComplete();
+            } else {
+                this.complete_()
+            }
         } else if (e.target.status == 308) {
             this.extractRange_(e.target)
             this.retryHandler.reset()
